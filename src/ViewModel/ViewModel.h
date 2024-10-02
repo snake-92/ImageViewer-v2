@@ -10,6 +10,7 @@ class ViewModel
         ViewModel(wxImage& image);
         ~ViewModel();
 
+    void InitListFiltre();
     void SetImageBase();
 
     // filtres

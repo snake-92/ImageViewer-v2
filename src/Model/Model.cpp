@@ -11,6 +11,7 @@ Model::~Model()
     Init();
 }
 
+/// @brief vide la liste des images
 void Model::Init()
 {
    m_ListDataImage.clear();
@@ -22,6 +23,19 @@ void Model::Init()
 void Model::AddImageInList(DataImage data)
 {
    m_ListDataImage.push_back(data);
+}
+
+/// @brief retourne l'image de base qui correspond à la première image dans la liste
+/// @return 
+cv::Mat Model::GetImageBase()
+{
+   if(!m_ListDataImage.empty())
+   {
+      return m_ListDataImage.front().image;
+   }else
+   {
+      throw "erreur image";
+   }
 }
 
 

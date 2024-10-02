@@ -50,6 +50,7 @@ BEGIN_EVENT_TABLE(MainFrameView, wxFrame)
     EVT_MENU(MENU_IMAGE::CONVERT_NDG_8_BITS, MainFrameView::OnImageOpSelect)
     EVT_MENU(MENU_IMAGE::AFFICHE_INFO_IMAGE, MainFrameView::OnImageOpSelect)
     EVT_MENU(MENU_IMAGE::AJUSTER_HISTOGRAMME, MainFrameView::OnImageOpSelect)
+    EVT_MENU(MENU_IMAGE::EFFACE_FILTRES, MainFrameView::OnImageOpSelect)
 
     EVT_MENU(MENU_FILTRE::ID_GAUSSIEN, MainFrameView::OnFiltreSelect)
     EVT_MENU(MENU_FILTRE::ID_MEDIAN, MainFrameView::OnFiltreSelect)
@@ -88,6 +89,7 @@ void MainFrameView::InitMenuBar()
     menuImage->Append(MENU_IMAGE::CONVERT_NDG_8_BITS,"Convertir en 8 bits (ndg)");
     menuImage->Append(MENU_IMAGE::AFFICHE_INFO_IMAGE,"Afficher informations image");
     menuImage->Append(MENU_IMAGE::AJUSTER_HISTOGRAMME,"Ajuster histogramme");
+    menuImage->Append(MENU_IMAGE::EFFACE_FILTRES,"Clear all filter");
 
     // menu Filtres
     wxMenu* menuFilter = new wxMenu();
@@ -189,6 +191,10 @@ void MainFrameView::InitToolsBar()
 /// @param event 
 void MainFrameView::OnLoadImage(wxCommandEvent& event)
 {
+    // vide la liste de filtre si besoin
+    if(m_CurrentImage.IsOk())
+        ClearAllFilter();
+
     PushStatusText(_("Load an image ..."),0); 
     
     wxFileDialog openFileDialog(this, _("Charger une image"), "", "",
@@ -229,11 +235,27 @@ void MainFrameView::OnZoomOut(wxCommandEvent &event)
 /// @param event 
 void MainFrameView::OnImageOpSelect(wxCommandEvent& event)
 {
-    
+    if(!m_CurrentImage.IsOk()) // si aucune image n'est chargé on ne fait rien
+        return;
+
+    switch((MENU_FILTRE)event.GetId())
+    {
+        case MENU_IMAGE::CONVERT_NDG_8_BITS:
+            break;
+        case MENU_IMAGE::AFFICHE_INFO_IMAGE:
+            break;
+        case MENU_IMAGE::AJUSTER_HISTOGRAMME:
+            break;
+        case MENU_IMAGE::EFFACE_FILTRES:
+            ClearAllFilter();
+            break;
+    }
+
+    UpdateImage(m_CurrentImage);
 }
 
 
-/// @brief 
+/// @brief mise à jour de la liste des filtres sur l'IHM
 /// @param name 
 void MainFrameView::UpdateListCheckBoxFiltre(const wxString& name, MENU_FILTRE idFiltre)
 {
@@ -246,6 +268,14 @@ void MainFrameView::UpdateListCheckBoxFiltre(const wxString& name, MENU_FILTRE i
     check->Bind(wxEVT_CHECKBOX, &MainFrameView::ClickCheckBox, this);
     m_SizerListFiltre->Add(check, 1, wxEXPAND | wxTop | wxBottom, 5);
     m_panelFiltres->SetSizerAndFit(m_SizerListFiltre);
+}
+
+/// @brief Vide la liste de filtre
+void MainFrameView::ClearAllFilter()
+{
+    m_SizerListFiltre->Clear();
+    m_panelFiltres->SetSizerAndFit(m_SizerListFiltre);
+    m_viewModel->InitListFiltre();
 }
 
 

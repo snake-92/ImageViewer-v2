@@ -41,6 +41,7 @@ private:
     std::map<int, MENU_FILTRE> m_idFilterChecbox;
     void UpdateListCheckBoxFiltre(const wxString& name, MENU_FILTRE idFiltre);
     void ClickCheckBox(wxCommandEvent& evt);
+    void ClearAllFilter();
 
     // view model
     ViewModel* m_viewModel;

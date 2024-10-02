@@ -18,6 +18,7 @@ public:
     ~Model();
     void Init();
     void AddImageInList(DataImage data);
+    cv::Mat GetImageBase();
 
     // filtres
     cv::Mat GaussienFilter(const cv::Mat& im_in, int size_x=3, int size_y=3, bool brefresh=false);
