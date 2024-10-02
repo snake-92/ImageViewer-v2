@@ -1,5 +1,6 @@
 #include "MainFrameView.h"
 #include "icons.h"
+#include "DialogConfigFilter.h"
 
 
 
@@ -268,15 +269,29 @@ void MainFrameView::OnFiltreSelect(wxCommandEvent& event)
     wxString filterName = "";
     PushStatusText(_("image processing ..."),0);
 
+    std::unique_ptr<DialogConfigFilter> dlg;
+
     switch((MENU_FILTRE)event.GetId())
     {
         case MENU_FILTRE::ID_GAUSSIEN:
             filterName = "Gaussian";
-            m_viewModel->Gaussien(3,3);
+            dlg = std::make_unique<DialogConfigFilter>(this, wxID_ANY, "Setting gaussian filter");
+            dlg->InitDialog((MENU_FILTRE)event.GetId());
+            if(dlg->ShowModal() == wxID_OK)
+            {
+                std::array<int,3> result = dlg->GetParams();
+                m_viewModel->Gaussien(result[0],result[1]);
+            }
             break;
         case MENU_FILTRE::ID_MEDIAN:
             filterName = "Median";
-            m_viewModel->Median(3);
+            dlg = std::make_unique<DialogConfigFilter>(this, wxID_ANY, "setting median filter");
+            dlg->InitDialog((MENU_FILTRE)event.GetId());
+            if(dlg->ShowModal() == wxID_OK)
+            {
+                std::array<int,3> result = dlg->GetParams();
+                m_viewModel->Median(result[0]);
+            }
             break;
         case MENU_FILTRE::ID_CONV_MOYENNEUR:
             filterName = "Average";
@@ -300,7 +315,13 @@ void MainFrameView::OnFiltreSelect(wxCommandEvent& event)
             break;
         case MENU_FILTRE::ID_CANNY:
             filterName = "Canny";
-            m_viewModel->CannyFilter(200,210);
+            dlg = std::make_unique<DialogConfigFilter>(this, wxID_ANY, "Setting canny filter");
+            dlg->InitDialog((MENU_FILTRE)event.GetId());
+            if(dlg->ShowModal() == wxID_OK)
+            {
+                std::array<int,3> result = dlg->GetParams();
+                m_viewModel->CannyFilter(result[0],result[1]);
+            }
             break;
         case MENU_FILTRE::ID_SEUILLAGE:
             filterName = "Binary";
@@ -308,23 +329,48 @@ void MainFrameView::OnFiltreSelect(wxCommandEvent& event)
             break;
         case MENU_FILTRE::ID_EROSION:
             filterName = "Erode";
-            m_viewModel->Erode(3,3,0);
+            dlg = std::make_unique<DialogConfigFilter>(this, wxID_ANY, "Setting erosion");
+            dlg->InitDialog((MENU_FILTRE)event.GetId());
+            if(dlg->ShowModal() == wxID_OK)
+            {
+                std::array<int,3> result = dlg->GetParams();
+                m_viewModel->Erode(result[0],result[1],result[2]);
+                
+            }
             break;
         case MENU_FILTRE::ID_DILATATION:
             filterName = "Dilate";
-            m_viewModel->Dilate(3,3,0);
+            dlg = std::make_unique<DialogConfigFilter>(this, wxID_ANY, "Setting dilate");
+            dlg->InitDialog((MENU_FILTRE)event.GetId());
+            if(dlg->ShowModal() == wxID_OK)
+            {
+                std::array<int,3> result = dlg->GetParams();
+                m_viewModel->Dilate(result[0],result[1],result[2]);
+            }
             break;
         case MENU_FILTRE::ID_OUVERTURE:
             filterName = "Open";
-            m_viewModel->OpenFilter(3,3,0);
+            dlg = std::make_unique<DialogConfigFilter>(this, wxID_ANY, "Setting open morpho");
+            dlg->InitDialog((MENU_FILTRE)event.GetId());
+            if(dlg->ShowModal() == wxID_OK)
+            {
+                std::array<int,3> result = dlg->GetParams();
+                m_viewModel->OpenFilter(result[0],result[1],result[2]);
+            }
             break;
         case MENU_FILTRE::ID_FERMETURE:
             filterName = "Close";
-            m_viewModel->CloseFilter(3,3,0);
+            dlg = std::make_unique<DialogConfigFilter>(this, wxID_ANY, "Setting close morpho");
+            dlg->InitDialog((MENU_FILTRE)event.GetId());
+            if(dlg->ShowModal() == wxID_OK)
+            {
+                std::array<int,3> result = dlg->GetParams();
+                m_viewModel->CloseFilter(result[0],result[1],result[2]);
+            }
             break;
     }
 
-    UpdateListCheckBoxFiltre(filterName, (MENU_FILTRE)event.GetId()) ;
+    UpdateListCheckBoxFiltre(filterName, (MENU_FILTRE)event.GetId()) ; // mise à jour de la liste des checkboxs
     UpdateImage(m_CurrentImage);
 
     PopStatusText(0);
