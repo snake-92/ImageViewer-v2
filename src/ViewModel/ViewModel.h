@@ -12,6 +12,7 @@ class ViewModel
 
     void InitListFiltre();
     void SetImageBase();
+    void HideFilter(int idx_, bool bhide_);
 
     // filtres
     void Gaussien(int size_x, int size_y);
@@ -33,7 +34,7 @@ class ViewModel
 
     private:
         cv::Mat ConvertWxImageToCvMat(wxImage& image_);
-        void CopyCvMatToWxImage(const cv::Mat& img_, bool bOneChannel=false);
+        void CopyCvMatToWxImage(const cv::Mat& img_);
         
         wxImage& m_Image;
 };

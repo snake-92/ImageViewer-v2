@@ -63,11 +63,11 @@ cv::Mat ViewModel::ConvertWxImageToCvMat(wxImage& image_)
 /// @brief Conversion cv::Mat en wxImage
 /// @param img_ 
 /// @param bOneChannel 
-void ViewModel::CopyCvMatToWxImage(const cv::Mat& img_, bool bOneChannel)
+void ViewModel::CopyCvMatToWxImage(const cv::Mat& img_)
 {
     try
     {
-        if(bOneChannel) // si image 1 channel, on met la même la même couche sur les cannaux R G et B 
+        if(img_.channels()==1) // si image 1 channel, on met la même la même couche sur les cannaux R G et B 
         {
             for(int y=0;y<img_.rows;y++)
             {
@@ -94,6 +94,16 @@ void ViewModel::CopyCvMatToWxImage(const cv::Mat& img_, bool bOneChannel)
     }
 }
 
+
+/// @brief Cache le filtre dont l'index est passé en paramètre
+/// @param idx_ : index du filtre 
+/// @param bhide_ : booleen pour savoir si cacher ou non le filtre true cache, false affiche
+void ViewModel::HideFilter(int idx_, bool bhide_)
+{
+    cv::Mat img = m_model->HideFilter(idx_, bhide_);
+    // convertion en wxImage
+    CopyCvMatToWxImage(img);
+}
 
 void ViewModel::Gaussien(int size_x, int size_y)
 {
@@ -148,14 +158,14 @@ void ViewModel::CannyFilter(int thresh1, int thresh2)
 {
     cv::Mat img = ConvertWxImageToCvMat(m_Image); // conversion en cv::Mat
     cv::Mat imOut = m_model->CannyFilter(img,thresh1,thresh2);
-    CopyCvMatToWxImage(imOut, true); // convertion en wxImage
+    CopyCvMatToWxImage(imOut); // convertion en wxImage
 }
 
 void ViewModel::Threshold()
 {
     cv::Mat img = ConvertWxImageToCvMat(m_Image); // conversion en cv::Mat
     cv::Mat imOut = m_model->Threshold(img);
-    CopyCvMatToWxImage(imOut, true); // convertion en wxImage
+    CopyCvMatToWxImage(imOut); // convertion en wxImage
 }
 
 void ViewModel::Erode(int size_x, int size_y, int type)

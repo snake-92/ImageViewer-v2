@@ -9,7 +9,7 @@ enum MENU_IMAGE
     EFFACE_FILTRES
 };
 
-
+// garder le même ordre que l'enum qui est dans ListEnums.h (Model)
 enum MENU_FILTRE
 {
     ID_GAUSSIEN=1,
@@ -32,7 +32,7 @@ enum MENU_FILTRE
 
 enum TOOLS
 {
-    SELECT = 100,
+    SELECT = 50,
     LINE,
     RECTANGLE,
     CLEAR

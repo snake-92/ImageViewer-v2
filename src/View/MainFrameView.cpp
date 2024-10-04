@@ -257,11 +257,11 @@ void MainFrameView::OnImageOpSelect(wxCommandEvent& event)
 
 /// @brief mise à jour de la liste des filtres sur l'IHM
 /// @param name 
-void MainFrameView::UpdateListCheckBoxFiltre(const wxString& name, MENU_FILTRE idFiltre)
+void MainFrameView::UpdateListCheckBoxFiltre(const wxString& name)
 {
-    int idCheckbox=((int)m_SizerListFiltre->GetItemCount()+1)*100; // id checkbox
+    int idCheckbox=((int)m_SizerListFiltre->GetItemCount()+1)+100; // id checkbox
 
-    m_idFilterChecbox[idCheckbox] = idFiltre; // sauvegarde l'id du filtre
+    m_mapIndexCheckbox[idCheckbox] = (int)m_SizerListFiltre->GetItemCount()+1; // sauvegarde l'id du filtre
 
     wxCheckBox* check = new wxCheckBox(m_panelFiltres,idCheckbox,name);
     check->SetValue(true);
@@ -283,8 +283,7 @@ void MainFrameView::ClearAllFilter()
 /// @param evt 
 void MainFrameView::ClickCheckBox(wxCommandEvent& evt)
 {
-    //int idx = evt.GetId();
-    //m_idFilterChecbox[evt.GetId()];
+    m_viewModel->HideFilter(m_mapIndexCheckbox[evt.GetId()], !evt.IsChecked());
     UpdateImage(m_CurrentImage);
 }
 
@@ -400,7 +399,7 @@ void MainFrameView::OnFiltreSelect(wxCommandEvent& event)
             break;
     }
 
-    UpdateListCheckBoxFiltre(filterName, (MENU_FILTRE)event.GetId()) ; // mise à jour de la liste des checkboxs
+    UpdateListCheckBoxFiltre(filterName) ; // mise à jour de la liste des checkboxs
     UpdateImage(m_CurrentImage);
 
     PopStatusText(0);

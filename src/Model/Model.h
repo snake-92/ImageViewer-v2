@@ -35,7 +35,13 @@ public:
     cv::Mat OpenFilter(const cv::Mat& im_in, int size_x=3, int size_y=3, int type=0, bool brefresh_=false);
     cv::Mat CloseFilter(const cv::Mat& im_in, int size_x=3, int size_y=3, int type=0, bool brefresh_=false);
 
+    cv::Mat HideFilter(int idx_, bool bhide_);
+    cv::Mat RemoveFilterImage(int idx_);
+
 private:
+    cv::Mat UpdateListFilterImage();
+    cv::Mat ApplyFilter(DataImage data);
+
     std::vector<DataImage> m_ListDataImage; // list de toutes les images + leur traitement
     
 };

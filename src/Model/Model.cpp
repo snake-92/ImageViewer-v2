@@ -39,6 +39,125 @@ cv::Mat Model::GetImageBase()
 }
 
 
+/// @brief Permet de cacher un filtre
+/// @param idx_ : index du filtre 
+/// @param bhide_ : booleen pour savoir si cacher ou non 
+/// @return 
+cv::Mat Model::HideFilter(int idx_, bool bhide_)
+{
+   if(idx_ >= m_ListDataImage.size() || m_ListDataImage.empty())
+        throw std::invalid_argument("index hors de la liste ou liste d'image vide !");
+
+    if(idx_ == 0) // pas de filtre sur l'image de base
+        return m_ListDataImage.front().image.clone();
+
+    m_ListDataImage[idx_].traitement.visible = !bhide_;
+    return UpdateListFilterImage(); // mise à jour de la liste et retour de l'image sans le filtre
+}
+
+
+/// @brief permet de supprimer un filtre de la liste
+/// @param idx_ : index du filtre
+/// @return 
+cv::Mat Model::RemoveFilterImage(int idx_)
+{
+   if(idx_ >= m_ListDataImage.size() || m_ListDataImage.empty())
+        throw std::invalid_argument("index hors de la liste ou liste d'image vide !");
+
+   // TODO
+   return UpdateListFilterImage();
+}
+
+
+/// @brief mis à jour de la liste en fonction des filtres cachés ou non
+/// @return 
+cv::Mat Model::UpdateListFilterImage()
+{
+   if(m_ListDataImage.empty())
+        throw std::invalid_argument("liste d'image vide !");
+
+   cv::Mat im_out;
+   if(m_ListDataImage.size()>1) // si il y a des images filtrées
+   {
+      im_out = m_ListDataImage.front().image.clone(); // recupération de l'image de base
+
+      for(int i=1; i<m_ListDataImage.size(); i++)
+      {
+         if(m_ListDataImage[i].traitement.visible) // si filtre actif on l'applique
+         {
+            DataImage data = m_ListDataImage[i];
+            data.image = im_out.clone();
+            im_out = ApplyFilter(data);
+         }
+      }
+   }
+
+   return im_out;
+}
+
+
+/// @brief Applique un filtre à une image
+/// @param data : donnees de l'image
+/// @return
+cv::Mat Model::ApplyFilter(DataImage data)
+{
+   cv::Mat im_out;
+   Gaussien filtreG = data.traitement;
+   Median filtreM = data.traitement;
+   Canny filtreCanny = data.traitement;
+   Morpho filtreMorpho = data.traitement;
+
+   switch(data.traitement.idTreatement)
+   {
+      case TREATEMENT_TYPE::ID_FILTRE_GAUSSIEN :
+         im_out = GaussienFilter(data.image, filtreG.sizeX, filtreG.sizeY, true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_MEDIAN :
+         im_out = MedianFilter(data.image, filtreM.size, true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_CONV_MOYENNEUR :
+         im_out = AverageFilter(data.image, true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_CONV_SHARPEN :
+         im_out = SharpenFilter(data.image, true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_CONV_LAPLACIEN :
+         im_out = LaplacienFilter(data.image, true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_CONV_SOBEL_X : 
+         im_out = SobelXFilter(data.image, true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_CONV_SOBEL_Y :
+         im_out = SobelYFilter(data.image, true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_SEUILLAGE :
+         im_out = Threshold(data.image, true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_CANNY :
+         im_out = CannyFilter(data.image, filtreCanny.seuil1, filtreCanny.seuil2, true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_EROSION :
+         im_out = Erode(data.image, filtreMorpho.sizeX, filtreMorpho.sizeY, filtreMorpho.type,true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_DILATATION :
+         im_out = Dilate(data.image, filtreMorpho.sizeX, filtreMorpho.sizeY, filtreMorpho.type,true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_OUVERTURE : 
+         im_out = OpenFilter(data.image, filtreMorpho.sizeX, filtreMorpho.sizeY, filtreMorpho.type,true);
+         break;
+      case TREATEMENT_TYPE::ID_FILTRE_FERMETURE :
+         im_out = CloseFilter(data.image,filtreMorpho.sizeX, filtreMorpho.sizeY, filtreMorpho.type, true);
+         break;
+
+      default: 
+         return m_ListDataImage.front().image;
+         break;
+   }
+
+    return im_out;
+}
+
+
 /// @brief Filtre gaussien
 /// @param im_in : image en entrée
 /// @param size_x : longueur x du filtre
@@ -61,7 +180,7 @@ cv::Mat Model::GaussienFilter(const cv::Mat& im_in, int size_x/*=3*/, int size_y
       // donnée filtre gaussien
       DataImage data;
       data.image = im_out;
-      Gaussien filtre;
+      Gaussien filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_GAUSSIEN;
       filtre.visible=true;
       filtre.sizeX=size_x;
@@ -93,7 +212,7 @@ cv::Mat Model::MedianFilter(const cv::Mat& im_in, int size_ /*= 3*/, bool brefre
       // donnée filtre median
       DataImage data;
       data.image = im_out;
-      Median filtre;
+      Median filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_MEDIAN;
       filtre.visible=true;
       filtre.size=size_;
@@ -121,7 +240,7 @@ cv::Mat Model::AverageFilter(const cv::Mat& im_in, bool brefresh/*=false*/)
       // donnée filtre moyenneur
       DataImage data;
       data.image = im_out;
-      Convolution filtre;
+      Convolution filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_CONV_MOYENNEUR;
       filtre.visible=true;
       filtre.kernel=kernel;
@@ -151,7 +270,7 @@ cv::Mat Model::SharpenFilter(const cv::Mat& im_in, bool brefresh/*=false*/)
       // donnée filtre sharpen
       DataImage data;
       data.image = im_out;
-      Convolution filtre;
+      Convolution filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_CONV_SHARPEN;
       filtre.visible=true;
       filtre.kernel=kernel;
@@ -181,7 +300,7 @@ cv::Mat Model::LaplacienFilter(const cv::Mat& im_in, bool brefresh/*=false*/)
       // donnée filtre laplacien
       DataImage data;
       data.image = im_out;
-      Convolution filtre;
+      Convolution filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_CONV_LAPLACIEN;
       filtre.visible=true;
       filtre.kernel=kernel;
@@ -211,7 +330,7 @@ cv::Mat Model::SobelXFilter(const cv::Mat& im_in, bool brefresh/*=false*/)
       // donnée filtre sobel
       DataImage data;
       data.image = im_out;
-      Convolution filtre;
+      Convolution filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_CONV_SOBEL_X;
       filtre.visible=true;
       filtre.kernel=kernel;
@@ -241,7 +360,7 @@ cv::Mat Model::SobelYFilter(const cv::Mat& im_in, bool brefresh/*=false*/)
       // donnée filtre sobel
       DataImage data;
       data.image = im_out;
-      Convolution filtre;
+      Convolution filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_CONV_SOBEL_Y;
       filtre.visible=true;
       filtre.kernel=kernel;
@@ -270,7 +389,7 @@ cv::Mat Model::CannyFilter(const cv::Mat& im_in, int thresh1, int thresh2, bool 
       // donnée filtre canny
       DataImage data;
       data.image = im_out;
-      Canny filtre;
+      Canny filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_CANNY;
       filtre.visible=true;
       filtre.seuil1=thresh1;
@@ -339,11 +458,12 @@ cv::Mat Model::Erode(const cv::Mat& im_in, int size_x/*=3*/, int size_y/*=3*/, i
       // donnée erosion
       DataImage data;
       data.image = im_out;
-      Gaussien filtre;
+      Morpho filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_EROSION;
       filtre.visible=true;
       filtre.sizeX=size_x;
       filtre.sizeY=size_y;
+      filtre.type = type;
       data.traitement = filtre;
       AddImageInList(data);
    }
@@ -382,11 +502,12 @@ cv::Mat Model::Dilate(const cv::Mat& im_in, int size_x/*=3*/, int size_y/*=3*/, 
       // donnée dilatation
       DataImage data;
       data.image = im_out;
-      Gaussien filtre;
+      Morpho filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_DILATATION;
       filtre.visible=true;
       filtre.sizeX=size_x;
       filtre.sizeY=size_y;
+      filtre.type = type;
       data.traitement = filtre;
       AddImageInList(data);
    }
@@ -425,11 +546,12 @@ cv::Mat Model::OpenFilter(const cv::Mat& im_in, int size_x/*=3*/, int size_y/*=3
       // donnée ouverure
       DataImage data;
       data.image = im_out;
-      Gaussien filtre;
+      Morpho filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_OUVERTURE;
       filtre.visible=true;
       filtre.sizeX=size_x;
       filtre.sizeY=size_y;
+      filtre.type = type;
       data.traitement = filtre;
       AddImageInList(data);
    }
@@ -468,11 +590,12 @@ cv::Mat Model::CloseFilter(const cv::Mat& im_in, int size_x/*=3*/, int size_y/*=
       // donnée ouverure
       DataImage data;
       data.image = im_out;
-      Gaussien filtre;
+      Morpho filtre({true, TREATEMENT_TYPE::ID_FILTRE_NONE});
       filtre.idTreatement = TREATEMENT_TYPE::ID_FILTRE_FERMETURE;
       filtre.visible=true;
       filtre.sizeX=size_x;
       filtre.sizeY=size_y;
+      filtre.type = type;
       data.traitement = filtre;
       AddImageInList(data);
    }
