@@ -241,6 +241,8 @@ void MainFrameView::OnImageOpSelect(wxCommandEvent& event)
     switch((MENU_FILTRE)event.GetId())
     {
         case MENU_IMAGE::CONVERT_NDG_8_BITS:
+        	m_CurrentImage = m_CurrentImage.ConvertToGreyscale();
+            m_viewModel->ResetImageBase();
             break;
         case MENU_IMAGE::AFFICHE_INFO_IMAGE:
             break;

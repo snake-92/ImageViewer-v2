@@ -13,6 +13,7 @@ class ViewModel
     void InitListFiltre();
     void SetImageBase();
     void HideFilter(int idx_, bool bhide_);
+    void ResetImageBase();
 
     // filtres
     void Gaussien(int size_x, int size_y);

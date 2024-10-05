@@ -20,6 +20,14 @@ void ViewModel::SetImageBase()
     m_model->AddImageInList({cvImage, {true, TREATEMENT_TYPE::ID_FILTRE_NONE}}); // ajout de l'image dans la liste des images
 }
 
+/// @brief Reset de l'image de base
+void ViewModel::ResetImageBase()
+{
+    cv::Mat cvImage = ConvertWxImageToCvMat(m_Image); // on converti d'abord l'image wxWidget en cvMat avant de l'envoyer au model
+    m_model->SetImageBase(cvImage);
+    CopyCvMatToWxImage(cvImage);
+}
+
 /// @brief Initialisation de la liste des filtres
 void ViewModel::InitListFiltre()
 {

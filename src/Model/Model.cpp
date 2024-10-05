@@ -38,6 +38,15 @@ cv::Mat Model::GetImageBase()
    }
 }
 
+/// @brief Mise à jour de l'image de base
+void Model::SetImageBase(const cv::Mat& img)
+{
+   if(!m_ListDataImage.empty())
+   {
+      m_ListDataImage.front().image = img.clone();
+   }
+}
+
 
 /// @brief Permet de cacher un filtre
 /// @param idx_ : index du filtre 
