@@ -9,48 +9,23 @@ struct FiltreData
 {
     bool visible; // visible ou non
     TREATEMENT_TYPE idTreatement; // identifiant du filtre
-};
 
-/// @brief structure filtre gaussien
-struct Gaussien : FiltreData
-{
-    Gaussien(const FiltreData& p) : FiltreData(p) {} 
-    int sizeX;
-    int sizeY;
-    int sigma;
-};
+    // donnée filtre gaussien
+    int sizeX; // taille en x. utilise aussi pour les filtres morphologiques
+    int sizeY; // taille en y. utilise aussi pour les filtres morphologiques
 
-/// @brief structure filtre median
-struct Median : FiltreData
-{
-    Median(const FiltreData& p) : FiltreData(p) {}
-    int size;
-};
+    // filtre médian
+    int size; // taille du filtre médian
 
-/// @brief structure filtre convolution
-struct Convolution : FiltreData
-{
-    Convolution(const FiltreData& p) : FiltreData(p) {}
-    cv::Mat kernel;
-};
+    // filtre convolution
+    cv::Mat kernel; // noyau de convolution
 
-/// @brief structure filtre canny
-struct Canny : FiltreData
-{
-    Canny(const FiltreData& p) : FiltreData(p) {}
-    int seuil1;
-    int seuil2;
-};
+    // filtre canny
+    int seuil1; // seuil 1
+    int seuil2; // seuil 2
 
-/// @brief structure filtre morphologique
-struct Morpho : FiltreData
-{
-    Morpho(const FiltreData& p) : FiltreData(p) {} 
-    int sizeX;
-    int sizeY;
+    // filtre morphologique
     int type; // 0:rectangle, 1:Croix, 2:ellipse
 };
-
-
 
 #endif

@@ -264,6 +264,7 @@ void MainFrameView::UpdateListCheckBoxFiltre(const wxString& name)
     m_mapIndexCheckbox[idCheckbox] = (int)m_SizerListFiltre->GetItemCount()+1; // sauvegarde l'id du filtre
 
     wxCheckBox* check = new wxCheckBox(m_panelFiltres,idCheckbox,name);
+    m_listCheckbox.push_back(check);
     check->SetValue(true);
     check->Bind(wxEVT_CHECKBOX, &MainFrameView::ClickCheckBox, this);
     m_SizerListFiltre->Add(check, 1, wxEXPAND | wxTop | wxBottom, 5);
@@ -273,9 +274,16 @@ void MainFrameView::UpdateListCheckBoxFiltre(const wxString& name)
 /// @brief Vide la liste de filtre
 void MainFrameView::ClearAllFilter()
 {
+    for(auto& check : m_listCheckbox) // suppression de tous les pointeurs vers les checkbox
+    {
+        if(check)
+            delete check;
+    }
+    m_listCheckbox.clear();
     m_SizerListFiltre->Clear();
     m_panelFiltres->SetSizerAndFit(m_SizerListFiltre);
     m_viewModel->InitListFiltre();
+    m_mapIndexCheckbox.clear();
 }
 
 

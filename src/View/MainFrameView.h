@@ -38,6 +38,7 @@ private:
     // filtres
     wxScrolled<wxPanel>* m_panelFiltres;
     wxBoxSizer* m_SizerListFiltre;
+    std::vector<wxCheckBox*> m_listCheckbox;
     std::map<int, int> m_mapIndexCheckbox; // id, idx
     void UpdateListCheckBoxFiltre(const wxString& name);
     void ClickCheckBox(wxCommandEvent& evt);
