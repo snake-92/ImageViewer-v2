@@ -1,7 +1,8 @@
 #include "MainFrameView.h"
 #include "icons.h"
 #include "DialogConfigFilter.h"
-
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
 
 
 MainFrameView::MainFrameView(const wxString &title, const wxPoint &pos, const wxSize &size, long style) : wxFrame(nullptr, wxID_ANY, title, pos, size, style)
@@ -32,7 +33,13 @@ MainFrameView::MainFrameView(const wxString &title, const wxPoint &pos, const wx
     // barre de status
     InitStatusBar();
 
+    // recupération du chemin où se trouve le .exe de l'application
+    wxFileName f(wxStandardPaths::Get().GetExecutablePath());
+    wxString appPath(f.GetPath());
+
+    // initialisation du viewModel
     m_viewModel = new ViewModel(m_CurrentImage);
+    m_viewModel->SetConfigPath(appPath+"/Config");
 }
 
 
@@ -65,6 +72,8 @@ BEGIN_EVENT_TABLE(MainFrameView, wxFrame)
     EVT_MENU(MENU_FILTRE::ID_DILATATION, MainFrameView::OnFiltreSelect)
     EVT_MENU(MENU_FILTRE::ID_OUVERTURE, MainFrameView::OnFiltreSelect)
     EVT_MENU(MENU_FILTRE::ID_FERMETURE, MainFrameView::OnFiltreSelect)
+
+    EVT_MENU(MENU_DETECTION::ID_FACE_DETECTION, MainFrameView::OnDetectFace)
 
     EVT_TOOL(wxID_ZOOM_IN, MainFrameView::OnZoomIn)
     EVT_TOOL(wxID_ZOOM_OUT, MainFrameView::OnZoomOut)
@@ -109,6 +118,7 @@ void MainFrameView::InitMenuBar()
 
     // menu Detections
     wxMenu* menuDetection = new wxMenu();
+    menuDetection->Append(MENU_DETECTION::ID_FACE_DETECTION,"Face Detection");
 
     // menu Aide
     wxMenu* menuHelp = new wxMenu();
@@ -412,6 +422,22 @@ void MainFrameView::OnFiltreSelect(wxCommandEvent& event)
     UpdateListCheckBoxFiltre(filterName) ; // mise à jour de la liste des checkboxs
     UpdateImage(m_CurrentImage);
 
+    PopStatusText(0);
+}
+
+
+/// @brief detection des visages sur une image
+/// @param WXUNUSED 
+void MainFrameView::OnDetectFace(wxCommandEvent& WXUNUSED(event))
+{
+    PushStatusText(_("image processing ..."),0);
+    
+    //if(m_viewModel->FaceExist())// si il y a au moins un visage sur l'image
+    //{
+        m_viewModel->DetectFace();
+    //}
+
+    UpdateImage(m_CurrentImage);
     PopStatusText(0);
 }
 

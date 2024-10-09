@@ -14,6 +14,7 @@ class ViewModel
     void SetImageBase();
     void HideFilter(int idx_, bool bhide_);
     void ResetImageBase();
+    void SetConfigPath(const wxString& path);
 
     // filtres
     void Gaussien(int size_x, int size_y);
@@ -29,6 +30,9 @@ class ViewModel
     void Dilate(int size_x, int size_y, int type);
     void OpenFilter(int size_x, int size_y, int type);
     void CloseFilter(int size_x, int size_y, int type);
+
+    // detections
+    void DetectFace();
 
     protected:
         Model* m_model;

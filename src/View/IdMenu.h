@@ -30,6 +30,12 @@ enum MENU_FILTRE
 };
 
 
+enum MENU_DETECTION
+{
+    ID_FACE_DETECTION=60
+};
+
+
 enum TOOLS
 {
     SELECT = 50,

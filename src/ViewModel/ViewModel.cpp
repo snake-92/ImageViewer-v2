@@ -12,6 +12,12 @@ ViewModel::~ViewModel()
     delete m_model;
 }
 
+/// @brief recupération du chemin à partir duquel se trouve le .exe et de là on a la config
+/// @param path 
+void ViewModel::SetConfigPath(const wxString& path)
+{
+    m_model->SetConfigPath(path.ToStdString());
+}
 
 void ViewModel::SetImageBase()
 {
@@ -201,5 +207,13 @@ void ViewModel::CloseFilter(int size_x, int size_y, int type)
 {
     cv::Mat img = ConvertWxImageToCvMat(m_Image); // conversion en cv::Mat
     cv::Mat imOut = m_model->CloseFilter(img,size_x,size_y,type);
+    CopyCvMatToWxImage(imOut); // convertion en wxImage
+}
+
+
+/// @brief Detection de visage
+void ViewModel::DetectFace()
+{
+    cv::Mat imOut = m_model->DetectFace();
     CopyCvMatToWxImage(imOut); // convertion en wxImage
 }

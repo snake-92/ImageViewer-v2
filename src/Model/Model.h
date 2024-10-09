@@ -20,6 +20,7 @@ public:
     void AddImageInList(DataImage data);
     cv::Mat GetImageBase();
     void SetImageBase(const cv::Mat& image);
+    void SetConfigPath(const std::string& path);
 
     // filtres
     cv::Mat GaussienFilter(const cv::Mat& im_in, int size_x=3, int size_y=3, bool brefresh=false);
@@ -39,11 +40,15 @@ public:
     cv::Mat HideFilter(int idx_, bool bhide_);
     cv::Mat RemoveFilterImage(int idx_);
 
+    // detections
+    cv::Mat DetectFace();
+
 private:
     cv::Mat UpdateListFilterImage();
     cv::Mat ApplyFilter(DataImage data);
 
     std::vector<DataImage> m_ListDataImage; // list de toutes les images + leur traitement
+    std::string m_ConfigPath;
     
 };
 

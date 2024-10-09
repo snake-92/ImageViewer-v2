@@ -44,6 +44,9 @@ private:
     void ClickCheckBox(wxCommandEvent& evt);
     void ClearAllFilter();
 
+    // detection
+    void OnDetectFace(wxCommandEvent& event);
+
     // view model
     ViewModel* m_viewModel;
 

@@ -17,6 +17,13 @@ void Model::Init()
    m_ListDataImage.clear();
 }
 
+/// @brief initialisation du chemin vers la config
+/// @param path 
+void Model::SetConfigPath(const std::string& path)
+{
+   m_ConfigPath = path;
+}
+
 
 /// @brief Ajouter une image + filtre associé dans la liste des images
 /// @param data 
@@ -583,4 +590,35 @@ cv::Mat Model::CloseFilter(const cv::Mat& im_in, int size_x/*=3*/, int size_y/*=
    }
 
    return im_out;
+}
+
+
+/// @brief detection de visage sur une image
+/// @param im_in 
+cv::Mat Model::DetectFace()
+{
+   if(m_ListDataImage.empty())
+      throw std::invalid_argument("liste d'image vide !");
+
+   cv::Mat im_in = m_ListDataImage.front().image; // recuperation de l'image de base
+
+   cv::CascadeClassifier face_cascade;
+   if(!face_cascade.load( m_ConfigPath+"/face/haarcascade_frontalface_default.xml" ))
+   {
+      throw std::invalid_argument("Erreur lecture fichier xml haarcascades!");
+   }
+
+   std::vector<cv::Rect> faces;
+   cv::Mat gray;
+   cv::cvtColor( im_in, gray, cv::COLOR_BGR2GRAY );
+   face_cascade.detectMultiScale( gray, faces, 1.1, 3, 0|cv::CASCADE_SCALE_IMAGE, cv::Size());
+
+   if(faces.size() > 0)
+   {
+      for (auto &rect : faces)
+         cv::rectangle(im_in, rect, cv::Scalar(0, 255, 0), 2, 1, 0);    
+   }
+
+   return im_in;
+
 }
