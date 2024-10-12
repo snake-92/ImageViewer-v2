@@ -16,6 +16,10 @@ class ViewModel
     void ResetImageBase();
     void SetConfigPath(const wxString& path);
 
+    // histgramme
+    void GetHistogram(std::vector<int>& histRed, std::vector<int>& histGreen, std::vector<int>& histBlue);
+    void ApplyHistogrammeStreching(int newMin, int newMax);
+
     // filtres
     void Gaussien(int size_x, int size_y);
     void Median(int size_);

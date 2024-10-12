@@ -22,6 +22,10 @@ public:
     void SetImageBase(const cv::Mat& image);
     void SetConfigPath(const std::string& path);
 
+    // histogramme
+    void GetHistogram(const cv::Mat& img, std::vector<int>& histRed, std::vector<int>& histGreen, std::vector<int>& histBlue);
+    cv::Mat AjustementHistogram(const cv::Mat& img, int valMin, int valMax);
+
     // filtres
     cv::Mat GaussienFilter(const cv::Mat& im_in, int size_x=3, int size_y=3, bool brefresh=false);
     cv::Mat MedianFilter(const cv::Mat& im_in, int size_ = 3, bool brefresh=false);
@@ -46,6 +50,8 @@ public:
 private:
     cv::Mat UpdateListFilterImage();
     cv::Mat ApplyFilter(DataImage data);
+    void CalculHistogram(const cv::Mat& img, std::vector<int>& histRed);
+    void RemiseEchelle(cv::Mat& img, int newMin, int newMax, const std::vector<int>& hist);
 
     std::vector<DataImage> m_ListDataImage; // list de toutes les images + leur traitement
     std::string m_ConfigPath;

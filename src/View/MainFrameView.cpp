@@ -3,6 +3,7 @@
 #include "DialogConfigFilter.h"
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
+#include "DialogHistogram.h"
 
 
 MainFrameView::MainFrameView(const wxString &title, const wxPoint &pos, const wxSize &size, long style) : wxFrame(nullptr, wxID_ANY, title, pos, size, style)
@@ -257,10 +258,27 @@ void MainFrameView::OnImageOpSelect(wxCommandEvent& event)
         case MENU_IMAGE::AFFICHE_INFO_IMAGE:
             break;
         case MENU_IMAGE::AJUSTER_HISTOGRAMME:
+            HistogramSetting();
             break;
         case MENU_IMAGE::EFFACE_FILTRES:
             ClearAllFilter();
             break;
+    }
+
+    UpdateImage(m_CurrentImage);
+}
+
+
+/// @brief fenetre de dialog pour l'histogramme de l'image
+void MainFrameView::HistogramSetting()
+{
+    DialogHistogram dlg(this, wxID_ANY, "Histogram");
+    std::vector<int> histRed, histGreen, histBlue;
+    m_viewModel->GetHistogram(histRed, histGreen, histBlue);
+
+    if(dlg.ShowModal() == wxID_OK)
+    {
+        m_viewModel->ApplyHistogrammeStreching(dlg.GetValueMin(), dlg.GetValueMax());
     }
 
     UpdateImage(m_CurrentImage);

@@ -109,6 +109,28 @@ void ViewModel::CopyCvMatToWxImage(const cv::Mat& img_)
 }
 
 
+/// @brief histogramme de l'image de base
+/// @param histRed 
+/// @param histGreen 
+/// @param histBlue 
+void ViewModel::GetHistogram(std::vector<int>& histRed, std::vector<int>& histGreen, std::vector<int>& histBlue)
+{
+    cv::Mat cvImage = ConvertWxImageToCvMat(m_Image);
+    m_model->GetHistogram(cvImage, histRed, histGreen, histBlue);
+}
+
+
+/// @brief etalement d'histogramme
+/// @param newMin 
+/// @param newMax 
+void ViewModel::ApplyHistogrammeStreching(int newMin, int newMax)
+{
+    cv::Mat cvImage = ConvertWxImageToCvMat(m_Image);
+    cv::Mat imOut = m_model->AjustementHistogram(cvImage, newMin, newMax);
+    CopyCvMatToWxImage(imOut);
+}
+
+
 /// @brief Cache le filtre dont l'index est passé en paramètre
 /// @param idx_ : index du filtre 
 /// @param bhide_ : booleen pour savoir si cacher ou non le filtre true cache, false affiche

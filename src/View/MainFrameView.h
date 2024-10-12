@@ -34,6 +34,7 @@ private:
     BufferedBitmap *m_bitmap;
     wxImage m_CurrentImage;
     void UpdateImage(const wxImage &image);
+    void HistogramSetting();
     
     // filtres
     wxScrolled<wxPanel>* m_panelFiltres;

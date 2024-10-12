@@ -1,0 +1,65 @@
+#include "DialogHistogram.h"
+
+DialogHistogram::DialogHistogram(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint &pos, const wxSize &size, long style)
+ : wxDialog(parent, id, title, pos, size, style)
+{
+    m_sliderValMin = new wxSlider(this, wxID_ANY, 0, 0, 255);
+    m_sliderValMax = new wxSlider(this, wxID_ANY, 255, 0, 255);
+    m_ValMin = new wxStaticText(this, wxID_ANY, "0");
+    m_ValMax = new wxStaticText(this, wxID_ANY, "255");
+
+    m_sliderValMin->Bind(wxEVT_SLIDER, &DialogHistogram::OnSliderMinChange, this);
+    m_sliderValMax->Bind(wxEVT_SLIDER, &DialogHistogram::OnSliderMaxChange, this);
+
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+    
+    // slider min
+    auto sizerH = new wxBoxSizer(wxHORIZONTAL);
+    sizerH->Add(m_sliderValMin, 0, wxEXPAND | wxALL, 10);
+    sizerH->Add(m_ValMin, 0, wxEXPAND | wxALL, 10);
+
+    // slider max
+    auto sizerH2 = new wxBoxSizer(wxHORIZONTAL);
+    sizerH2->Add(m_sliderValMax, 0, wxEXPAND | wxALL, 10);    
+    sizerH2->Add(m_ValMax, 0, wxEXPAND | wxALL, 10);
+
+    sizer->Add(sizerH, 0, wxEXPAND | wxALL, 10);
+    sizer->Add(sizerH2, 0, wxEXPAND | wxALL, 10);
+
+    sizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALIGN_CENTER | wxALL, FromDIP(10));
+    this->SetSizerAndFit(sizer);
+
+}
+
+void DialogHistogram::OnSliderMinChange(wxCommandEvent& event)
+{
+    if(m_sliderValMax->GetValue() < event.GetInt())
+    {
+        m_sliderValMax->SetValue(event.GetInt());
+        m_ValMax->SetLabel(wxString::Format(wxT("%d"), event.GetInt()));
+    }
+        
+    m_ValMin->SetLabel(wxString::Format(wxT("%d"), event.GetInt()));
+}
+
+void DialogHistogram::OnSliderMaxChange(wxCommandEvent& event)
+{
+    if(m_sliderValMin->GetValue() > event.GetInt())
+    {
+        m_sliderValMin->SetValue(event.GetInt());
+        m_ValMin->SetLabel(wxString::Format(wxT("%d"), event.GetInt()));
+    }
+        
+    m_ValMax->SetLabel(wxString::Format(wxT("%d"), event.GetInt()));
+}
+
+
+int DialogHistogram::GetValueMin() const
+{
+    return (int)m_sliderValMin->GetValue();
+}
+
+int DialogHistogram::GetValueMax() const
+{
+    return (int)m_sliderValMax->GetValue();
+}

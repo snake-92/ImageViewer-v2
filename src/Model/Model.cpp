@@ -112,6 +112,126 @@ cv::Mat Model::UpdateListFilterImage()
 }
 
 
+/// @brief Calcul l'histogramme d'une image
+/// @param img 
+/// @param histRed vecteur contenant l'histogram
+void Model::CalculHistogram(const cv::Mat& img, std::vector<int>& hist)
+{
+   hist.resize(256);
+
+   // initialisation du vecteur
+   for(int i=0; i<256; i++)
+   {
+      hist[i] = 0;
+   }
+
+   for(int i=0; i<img.rows; i++)
+   {
+      for(int j=0; j<img.cols; j++)
+      {
+         hist[(int)img.at<uchar>(i,j)]++;
+      }
+   }
+}
+
+/// @brief retourne l'histogramme d'une image
+/// @param histRed  histogramme de la composante rouge. si image est ndg, les autres vecteur seront vide sauf lui
+/// @param histGreen  histogramme composante verte
+/// @param histBlue  histogramme composante bleu
+void Model::GetHistogram(const cv::Mat& img, std::vector<int>& histRed, std::vector<int>& histGreen, std::vector<int>& histBlue)
+{
+   if(img.channels() == 1)
+   {
+      CalculHistogram(img, histRed);
+   }
+   else
+   {
+      std::vector<cv::Mat> bgrPlanes;
+      cv::split(img, bgrPlanes);
+
+      CalculHistogram(bgrPlanes[2], histRed);
+      CalculHistogram(bgrPlanes[1], histGreen);
+      CalculHistogram(bgrPlanes[0], histBlue);
+   }
+}
+
+
+/// @brief L'étalement d'histogramme en fonction de min et max
+/// @param img 
+/// @param newMin 
+/// @param newMax 
+/// @param histogram 
+void Model::RemiseEchelle(cv::Mat& img, int newMin, int newMax, const std::vector<int>& histogram)
+{
+   // Calculer la distribution cumulative 
+    int totalPixels = img.rows * img.cols;
+    int cumulativeHistogram[256] = {0};
+    cumulativeHistogram[0] = histogram[0];
+
+    for (int i = 1; i < 256; i++) 
+    {
+        cumulativeHistogram[i] = cumulativeHistogram[i - 1] + histogram[i];
+    }
+
+    // Obtenir les valeurs minimum et maximum de l'intensité non-nulles dans l'image
+    int cdfMin = 0;
+    for (int i = 0; i < 256; i++) 
+    {
+        if (cumulativeHistogram[i] > 0) 
+        {
+            cdfMin = cumulativeHistogram[i];
+            break;
+        }
+    }
+
+    // Remise à l'échelle de la CDF pour qu'elle tienne entre newMin et newMax
+    for (int i = 0; i < 256; i++) 
+    {
+        cumulativeHistogram[i] = ((cumulativeHistogram[i] - cdfMin) * (newMax - newMin)) / (totalPixels - cdfMin) + newMin;
+        if (cumulativeHistogram[i] < newMin) cumulativeHistogram[i] = newMin;
+        if (cumulativeHistogram[i] > newMax) cumulativeHistogram[i] = newMax;
+    }
+
+   // Créer l'image de sortie avec les nouvelles valeurs de pixels
+    for (int y = 0; y < img.rows; y++) 
+    {
+        for (int x = 0; x < img.cols; x++)      
+        {
+            img.at<uchar>(y, x) = cumulativeHistogram[img.at<uchar>(y, x)];
+        }
+    }
+}
+
+
+/// @brief Applique un étalement de l'histogramme
+/// @param img 
+/// @param valMin nouvelle valeur minimale de l'image
+/// @param valMax nouvelle valeur maximale de l'image
+cv::Mat Model::AjustementHistogram(const cv::Mat& img, int valMin, int valMax)
+{
+   std::vector<int> histRed, histGreen, histBlue;
+   GetHistogram(img, histRed, histGreen, histBlue);
+
+   cv::Mat imOut = img.clone();
+
+   if(img.channels() == 1)
+   {
+      RemiseEchelle(imOut, valMin, valMax, histRed);
+   }
+   else
+   {
+      std::vector<cv::Mat> bgrPlanes;
+      cv::split(img, bgrPlanes);
+      RemiseEchelle(bgrPlanes[2], valMin, valMax, histRed);
+      RemiseEchelle(bgrPlanes[1], valMin, valMax, histGreen);
+      RemiseEchelle(bgrPlanes[0], valMin, valMax, histBlue);
+      cv::merge(bgrPlanes, imOut);
+   }
+
+   return imOut;
+}
+
+
 /// @brief Applique un filtre à une image
 /// @param data : donnees de l'image
 /// @return
