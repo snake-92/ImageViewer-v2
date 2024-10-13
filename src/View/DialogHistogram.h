@@ -11,9 +11,18 @@ class DialogHistogram : public wxDialog
         int GetValueMin() const;
         int GetValueMax() const;
 
+        void SetHistogram(const std::vector<int> &histRed, const std::vector<int> &histGreen, const std::vector<int> &histBlue);
+
     private:
+        void Init(); 
         void OnSliderMinChange(wxCommandEvent& event);
         void OnSliderMaxChange(wxCommandEvent& event);
+
+        std::vector<int> m_histRed;
+        std::vector<int> m_histGreen;
+        std::vector<int> m_histBlue;
+
+        std::vector<int> m_hist;
 
         wxSlider* m_sliderValMin;
         wxSlider* m_sliderValMax;

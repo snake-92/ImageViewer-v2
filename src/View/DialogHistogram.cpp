@@ -1,7 +1,15 @@
 #include "DialogHistogram.h"
+#include "ChartHistControl.h"
 
 DialogHistogram::DialogHistogram(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint &pos, const wxSize &size, long style)
  : wxDialog(parent, id, title, pos, size, style)
+{
+    
+
+}
+
+/// @brief initialisation de la fenetre
+void DialogHistogram::Init()
 {
     m_sliderValMin = new wxSlider(this, wxID_ANY, 0, 0, 255);
     m_sliderValMax = new wxSlider(this, wxID_ANY, 255, 0, 255);
@@ -12,7 +20,13 @@ DialogHistogram::DialogHistogram(wxWindow* parent, wxWindowID id, const wxString
     m_sliderValMax->Bind(wxEVT_SLIDER, &DialogHistogram::OnSliderMaxChange, this);
 
     auto sizer = new wxBoxSizer(wxVERTICAL);
-    
+
+    // graphe de l'histogramme
+    auto chart = new ChartHistControl(this, wxID_ANY, wxDefaultPosition, this->FromDIP(wxSize(640, 480)));
+    chart->m_title = "Histogramme";
+    chart->m_values = m_hist;
+    sizer->Add(chart, 1, wxEXPAND | wxALL, 10);
+
     // slider min
     auto sizerH = new wxBoxSizer(wxHORIZONTAL);
     sizerH->Add(m_sliderValMin, 0, wxEXPAND | wxALL, 10);
@@ -62,4 +76,29 @@ int DialogHistogram::GetValueMin() const
 int DialogHistogram::GetValueMax() const
 {
     return (int)m_sliderValMax->GetValue();
+}
+
+
+/// @brief copie des histogrammes de chaque composante de l'image
+/// @param histRed 
+/// @param histGreen 
+/// @param histBlue 
+void DialogHistogram::SetHistogram(const std::vector<int> &histRed, const std::vector<int> &histGreen, const std::vector<int> &histBlue)
+{
+    m_histRed = histRed;
+    m_histGreen = histGreen;    
+    m_histBlue = histBlue;
+
+    m_hist = histRed;
+
+    if(!histRed.empty() && !histGreen.empty() && !histBlue.empty())
+    {
+        // on fait la moyenne des trois histogrammes
+        for(int i = 0; i < histRed.size(); i++)
+        {
+            m_hist[i] = (histRed[i] + histGreen[i] + histBlue[i]) / 3;
+        }
+    }
+
+    Init();
 }

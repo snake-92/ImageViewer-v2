@@ -275,7 +275,7 @@ void MainFrameView::HistogramSetting()
     DialogHistogram dlg(this, wxID_ANY, "Histogram");
     std::vector<int> histRed, histGreen, histBlue;
     m_viewModel->GetHistogram(histRed, histGreen, histBlue);
-
+    dlg.SetHistogram(histRed, histGreen, histBlue);
     if(dlg.ShowModal() == wxID_OK)
     {
         m_viewModel->ApplyHistogrammeStreching(dlg.GetValueMin(), dlg.GetValueMax());
