@@ -18,10 +18,12 @@ jobs:
       uses: actions/checkout@v3
   
     # 2. Install TDM-GCC-64 (GCC for Windows)
-    - name: Install TDM-GCC-64
+    - name: Install TDM-GCC-64 manually
       run: |
-        choco install tdm-gcc-64
-        shell: cmd
+        curl -L -o tdm-gcc-64.exe https://jmeubank.github.io/tdm-gcc/download/tdm64-gcc-10.3.0.exe
+        start /wait tdm-gcc-64.exe /S
+        setx PATH "%PATH%;C:\TDM-GCC-64\bin"
+      shell: cmd
   
     # 3. Install vcpkg (for wxWidgets and OpenCV)
     - name: Install vcpkg
