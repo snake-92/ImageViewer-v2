@@ -30,8 +30,8 @@ jobs:
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
-        .\vcpkg\vcpkg install wxwidgets@3.2.5:x64-windows
-        .\vcpkg\vcpkg install opencv@4.9.0:x64-windows
+        .\vcpkg\vcpkg install wxwidgets:x64-windows
+        .\vcpkg\vcpkg install opencv:x64-windows
       shell: powershell
   
     # 4. Build the project using g++
