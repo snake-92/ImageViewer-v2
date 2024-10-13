@@ -1,0 +1,39 @@
+name: Build C++ project with TDM-GCC, wxWidgets and OpenCV
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      jobs:
+      
+build:
+  runs-on: windows-latest
+
+  steps:
+  # 1. Checkout the repository
+  - name: Checkout repository
+    uses: actions/checkout@v3
+
+  # 2. Install TDM-GCC-64 (GCC for Windows)
+  - name: Install TDM-GCC-64
+    run: |
+      choco install tdm-gcc-64
+      shell: cmd
+
+  # 3. Install vcpkg (for wxWidgets and OpenCV)
+  - name: Install vcpkg
+    run: |
+      git clone https://github.com/microsoft/vcpkg.git
+      .\vcpkg\bootstrap-vcpkg.bat
+      .\vcpkg\vcpkg install wxwidgets:x64-windows
+      .\vcpkg\vcpkg install opencv:x64-windows
+    shell: powershell
+
+  # 4. Build the project using the commands from tasks.json
+  - name: Build the project
+    run: |
+      g++ -o output.exe src/main.cpp -I C:/path_to_vcpkg/vcpkg/installed/x64-windows/include -L C:/path_to_vcpkg/vcpkg/installed/x64-windows/lib -lopencv_world455 -lwxmsw30u_core -lwxbase30u
+    shell: cmd
