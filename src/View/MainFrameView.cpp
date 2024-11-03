@@ -75,6 +75,7 @@ BEGIN_EVENT_TABLE(MainFrameView, wxFrame)
     EVT_MENU(MENU_FILTRE::ID_FERMETURE, MainFrameView::OnFiltreSelect)
 
     EVT_MENU(MENU_DETECTION::ID_FACE_DETECTION, MainFrameView::OnDetectFace)
+    EVT_MENU(MENU_DETECTION::ID_FACE_DETECTION_IA, MainFrameView::OnDetectFaceIA)
 
     EVT_TOOL(wxID_ZOOM_IN, MainFrameView::OnZoomIn)
     EVT_TOOL(wxID_ZOOM_OUT, MainFrameView::OnZoomOut)
@@ -119,7 +120,8 @@ void MainFrameView::InitMenuBar()
 
     // menu Detections
     wxMenu* menuDetection = new wxMenu();
-    menuDetection->Append(MENU_DETECTION::ID_FACE_DETECTION,"Face Detection");
+    menuDetection->Append(MENU_DETECTION::ID_FACE_DETECTION,"Face Detection Haarcascade");
+    menuDetection->Append(MENU_DETECTION::ID_FACE_DETECTION_IA,"Face Detection RNN");
 
     // menu Aide
     wxMenu* menuHelp = new wxMenu();
@@ -454,6 +456,27 @@ void MainFrameView::OnDetectFace(wxCommandEvent& WXUNUSED(event))
     //{
         m_viewModel->DetectFace();
     //}
+
+    UpdateImage(m_CurrentImage);
+    PopStatusText(0);
+}
+
+
+/// @brief detection des visages avec un reseau entrainé avec yolov8
+/// @param WXUNUSED 
+void MainFrameView::OnDetectFaceIA(wxCommandEvent& WXUNUSED(event))
+{
+    PushStatusText(_("image processing ..."),0);
+    
+    try
+    {
+        m_viewModel->DetectFaceIA();
+    }
+    catch(...)
+    {
+        wxMessageBox(_("Une erreur est survenue"), _("Erreur RNN"));
+    }
+    
 
     UpdateImage(m_CurrentImage);
     PopStatusText(0);

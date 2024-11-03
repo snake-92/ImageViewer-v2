@@ -28,4 +28,14 @@ struct FiltreData
     int type; // 0:rectangle, 1:Croix, 2:ellipse
 };
 
+
+struct Detection
+{
+    int class_id{0};
+    std::string className{};
+    float confidence{0.0};
+    cv::Scalar color{};
+    cv::Rect box{};
+};
+
 #endif

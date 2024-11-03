@@ -47,6 +47,7 @@ private:
 
     // detection
     void OnDetectFace(wxCommandEvent& event);
+    void OnDetectFaceIA(wxCommandEvent& event);
 
     // view model
     ViewModel* m_viewModel;

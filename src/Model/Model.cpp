@@ -1,5 +1,7 @@
 #include "Model.h"
-
+#include <fstream>
+#include <opencv2/dnn.hpp>
+#include <random>
 
 Model::Model()
 {
@@ -741,4 +743,146 @@ cv::Mat Model::DetectFace()
 
    return im_in;
 
+}
+
+
+cv::Mat Model::FormatToSquare(const cv::Mat &source)
+{
+    int col = source.cols;
+    int row = source.rows;
+    int _max = MAX(col, row);
+    cv::Mat result = cv::Mat::zeros(_max, _max, CV_8UC3);
+    source.copyTo(result(cv::Rect(0, 0, col, row)));
+    return result;
+}
+
+
+/// @brief detection de visage avec un reseau entrainé avec yolov8
+/// @param im_in 
+cv::Mat Model::DetectFaceIA(const cv::Mat& im_in)
+{
+   // chemin vers le réseau
+   std::string path = m_ConfigPath+"/face/best.onnx";
+   std::ifstream fileRNN(path);
+
+   if(!fileRNN.good())
+   {
+      throw std::invalid_argument("Erreur lecture fichier onnx!");
+   }
+
+   // chargement du modèle
+   cv::dnn::Net net = cv::dnn::readNetFromONNX(path);
+   net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
+   net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU); // utilisation du CPU
+
+   // recuperation des classes. Il n'y a qu'une seule classe pour la détection de visage
+   std::vector<std::string> classes = {"face"};
+
+   // image de sortie
+   cv::Mat imgResize;
+   //cv::resize(im_in, imgResize, cv::Size(640, 640)); 
+   imgResize = FormatToSquare(im_in);
+
+   try
+   { 
+      cv::Mat blob;
+      cv::dnn::blobFromImage(imgResize, blob, 1.0/255.0, cv::Size(640,640), cv::Scalar(), true, false);
+      net.setInput(blob);
+
+      std::vector<cv::Mat> outputs;
+      net.forward(outputs, net.getUnconnectedOutLayersNames());
+
+      int rows = outputs[0].size[1];
+      int dimensions = outputs[0].size[2];
+
+      // yolov8 has an output of shape (batchSize, 84,  8400) (Num classes + box[x,y,w,h])
+      if (dimensions > rows) // Check if the shape[2] is more than shape[1] (yolov8)
+      {
+         rows = outputs[0].size[2];
+         dimensions = outputs[0].size[1];
+
+         outputs[0] = outputs[0].reshape(1, dimensions);
+         cv::transpose(outputs[0], outputs[0]);
+      }
+
+      float *data = (float *)outputs[0].data;
+
+      float x_factor = imgResize.cols / 640;
+      float y_factor = imgResize.rows / 640;
+
+      std::vector<int> class_ids;
+      std::vector<float> confidences;
+      std::vector<cv::Rect> boxes;
+
+      const float modelNMSThreshold = 0.4f;
+      const float modelScoreThreshold = 0.4f;
+
+      for (int i = 0; i < rows; ++i)
+      {
+         float *classes_scores = data+4;
+
+         cv::Mat scores(1, classes.size(), CV_32FC1, classes_scores);
+         cv::Point class_id;
+         double maxClassScore;
+
+         cv::minMaxLoc(scores, 0, &maxClassScore, 0, &class_id);
+
+         if (maxClassScore > modelScoreThreshold)
+         {
+            confidences.push_back(maxClassScore);
+            class_ids.push_back(class_id.x);
+
+            float x = data[0];
+            float y = data[1];
+            float w = data[2];
+            float h = data[3];
+
+            int left = int((x - 0.5 * w) * x_factor);
+            int top = int((y - 0.5 * h) * y_factor);
+
+            int width = int(w * x_factor);
+            int height = int(h * y_factor);
+
+            boxes.push_back(cv::Rect(left, top, width, height));
+         }
+         data += dimensions;
+      }
+
+      std::vector<int> nms_result;
+      cv::dnn::NMSBoxes(boxes, confidences, modelScoreThreshold, modelNMSThreshold, nms_result);
+
+      std::vector<Detection> detections{};
+      for (unsigned long i = 0; i < nms_result.size(); ++i)
+      {
+         int idx = nms_result[i];
+
+         Detection result;
+         result.class_id = class_ids[idx];
+         result.confidence = confidences[idx];
+
+         std::random_device rd;
+         std::mt19937 gen(rd());
+         std::uniform_int_distribution<int> dis(100, 255);
+         result.color = cv::Scalar(dis(gen),
+                                    dis(gen),
+                                    dis(gen));
+
+         result.className = classes[result.class_id];
+         result.box = boxes[idx];
+
+         detections.push_back(result);
+      }
+    
+      for (const auto& detection : detections)
+      {
+         cv::rectangle(imgResize, detection.box, detection.color, 2);
+         cv::putText(imgResize, detection.className, cv::Point(detection.box.x, detection.box.y - 5), cv::FONT_HERSHEY_SIMPLEX, 0.5, detection.color, 2);
+      }
+   }
+   catch(...)
+   {
+      throw std::invalid_argument("Erreur detection visage!");
+   }
+
+   return imgResize;
 }

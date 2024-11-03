@@ -37,6 +37,7 @@ class ViewModel
 
     // detections
     void DetectFace();
+    void DetectFaceIA();
 
     protected:
         Model* m_model;

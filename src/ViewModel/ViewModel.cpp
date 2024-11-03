@@ -239,3 +239,12 @@ void ViewModel::DetectFace()
     cv::Mat imOut = m_model->DetectFace();
     CopyCvMatToWxImage(imOut); // convertion en wxImage
 }
+
+
+/// @brief Detection de visage avec un reseau entrainé avec yolov8
+void ViewModel::DetectFaceIA()
+{
+    cv::Mat img = ConvertWxImageToCvMat(m_Image); // conversion en cv::Mat
+    cv::Mat imOut = m_model->DetectFaceIA(img);
+    CopyCvMatToWxImage(imOut); // convertion en wxImage
+}

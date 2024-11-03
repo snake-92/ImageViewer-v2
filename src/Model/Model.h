@@ -46,12 +46,14 @@ public:
 
     // detections
     cv::Mat DetectFace();
+    cv::Mat DetectFaceIA(const cv::Mat& im_in);
 
 private:
     cv::Mat UpdateListFilterImage();
     cv::Mat ApplyFilter(DataImage data);
     void CalculHistogram(const cv::Mat& img, std::vector<int>& histRed);
     void RemiseEchelle(cv::Mat& img, int newMin, int newMax, const std::vector<int>& hist);
+    cv::Mat FormatToSquare(const cv::Mat &source);
 
     std::vector<DataImage> m_ListDataImage; // list de toutes les images + leur traitement
     std::string m_ConfigPath;
