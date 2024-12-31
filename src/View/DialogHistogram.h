@@ -2,12 +2,13 @@
 #define DIALOGHISTOGRAM_H
 
 #include <wx/wx.h>
+#include <memory>
+#include "ChartHistControl.h"
 
 class DialogHistogram : public wxDialog
 {
     public:
         DialogHistogram(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = "Dialog", const wxPoint &pos = wxDefaultPosition, const wxSize &size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE);
-        
         int GetValueMin() const;
         int GetValueMax() const;
 
@@ -28,6 +29,8 @@ class DialogHistogram : public wxDialog
         wxSlider* m_sliderValMax;
         wxStaticText* m_ValMin;
         wxStaticText* m_ValMax;
+
+        std::unique_ptr<ChartHistControl> m_chart;
 };
 
 #endif // DIALOGHISTOGRAM_H

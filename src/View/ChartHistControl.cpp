@@ -8,6 +8,8 @@
 ChartHistControl::ChartHistControl(wxWindow* parent, wxWindowID id, const wxPoint &pos, const wxSize &size) :wxWindow(parent, id, pos, size, wxFULL_REPAINT_ON_RESIZE)
 {
     this->SetBackgroundStyle(wxBG_STYLE_PAINT);
+    m_Xmin = 0.0;
+    m_Xmax = 1.0;
     this->Bind(wxEVT_PAINT, &ChartHistControl::OnPaint, this);
 }
 
@@ -79,10 +81,12 @@ void ChartHistControl::OnPaint(wxPaintEvent& event)
             gc->DrawText(text, chartArea.GetLeft()-labelsToChartAreaMarin-tw1, lineStartPoint.m_y+th1/2.0);
         }
 
-        wxPoint2DDouble leftHLinePoints[]{matrix.TransformPoint({0,0}), matrix.TransformPoint({0,1})};
-        wxPoint2DDouble rightHLinePoints[]{matrix.TransformPoint({1,0}), matrix.TransformPoint({1,1})};
-        gc->StrokeLines(2, leftHLinePoints);
-        gc->StrokeLines(2, rightHLinePoints);
+        // ligne verticale rouge permettant d'étaller l'histogramme de l'image
+        wxPoint2DDouble leftVLine[]{matrix.TransformPoint({m_Xmin,0}), matrix.TransformPoint({m_Xmin,static_cast<double>(yValueSpan)})};
+        wxPoint2DDouble rightVLine[]{matrix.TransformPoint({m_Xmax,0}), matrix.TransformPoint({m_Xmax,static_cast<double>(yValueSpan)})};
+        gc->SetPen(wxPen(wxColor(255,0,0)));
+        gc->StrokeLines(2, leftVLine);
+        gc->StrokeLines(2, rightVLine);
 
         wxPoint2DDouble *pointArray = new wxPoint2DDouble[256];
 
@@ -103,4 +107,16 @@ void ChartHistControl::OnPaint(wxPaintEvent& event)
 
         delete gc;
     }
+}
+
+
+void ChartHistControl::SetPosVerticalLine(int xmin, int xmax)
+{
+    m_Xmin = xmin/255.0;
+    m_Xmax = xmax/255.0;
+
+    if(m_Xmin > m_Xmax)
+        std::swap(m_Xmin, m_Xmax);
+
+    this->Refresh();
 }

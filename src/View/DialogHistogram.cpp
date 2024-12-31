@@ -1,12 +1,11 @@
 #include "DialogHistogram.h"
-#include "ChartHistControl.h"
 
 DialogHistogram::DialogHistogram(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint &pos, const wxSize &size, long style)
  : wxDialog(parent, id, title, pos, size, style)
 {
-    
-
+    m_chart = nullptr;
 }
+
 
 /// @brief initialisation de la fenetre
 void DialogHistogram::Init()
@@ -22,10 +21,10 @@ void DialogHistogram::Init()
     auto sizer = new wxBoxSizer(wxVERTICAL);
 
     // graphe de l'histogramme
-    auto chart = new ChartHistControl(this, wxID_ANY, wxDefaultPosition, this->FromDIP(wxSize(640, 480)));
-    chart->m_title = "Histogramme";
-    chart->m_values = m_hist;
-    sizer->Add(chart, 1, wxEXPAND | wxALL, 10);
+    m_chart = std::make_unique<ChartHistControl>(this, wxID_ANY, wxDefaultPosition, this->FromDIP(wxSize(640, 480))); // ChartHistControl(this, wxID_ANY, wxDefaultPosition, this->FromDIP(wxSize(640, 480)));
+    m_chart->m_title = "Histogramme";
+    m_chart->m_values = m_hist;
+    sizer->Add(m_chart.get(), 1, wxEXPAND | wxALL, 10);
 
     // slider min
     auto sizerH = new wxBoxSizer(wxHORIZONTAL);
@@ -52,7 +51,7 @@ void DialogHistogram::OnSliderMinChange(wxCommandEvent& event)
         m_sliderValMax->SetValue(event.GetInt());
         m_ValMax->SetLabel(wxString::Format(wxT("%d"), event.GetInt()));
     }
-        
+    m_chart->SetPosVerticalLine(event.GetInt(), m_sliderValMax->GetValue());
     m_ValMin->SetLabel(wxString::Format(wxT("%d"), event.GetInt()));
 }
 
@@ -63,7 +62,7 @@ void DialogHistogram::OnSliderMaxChange(wxCommandEvent& event)
         m_sliderValMin->SetValue(event.GetInt());
         m_ValMin->SetLabel(wxString::Format(wxT("%d"), event.GetInt()));
     }
-        
+    m_chart->SetPosVerticalLine(m_sliderValMin->GetValue(), event.GetInt());   
     m_ValMax->SetLabel(wxString::Format(wxT("%d"), event.GetInt()));
 }
 
