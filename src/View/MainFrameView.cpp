@@ -222,6 +222,8 @@ void MainFrameView::OnLoadImage(wxCommandEvent& event)
         return;
     }
 
+    m_ImageBaseSave = m_CurrentImage.Copy(); // on sauvegarde l'image de base
+
     UpdateImage(m_CurrentImage);
     m_viewModel->SetImageBase(); // envoi l'image dans le model
 
@@ -314,8 +316,14 @@ void MainFrameView::ClearAllFilter()
     m_listCheckbox.clear();
     m_SizerListFiltre->Clear();
     m_panelFiltres->SetSizerAndFit(m_SizerListFiltre);
+
+    // on revient à l'image de base
+    m_CurrentImage = m_ImageBaseSave.Copy();
+    m_viewModel->ResetImageBase();
     m_viewModel->InitListFiltre();
     m_mapIndexCheckbox.clear();
+
+    UpdateImage(m_CurrentImage);
 }
 
 

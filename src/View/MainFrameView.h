@@ -33,6 +33,7 @@ private:
     // gestion image
     BufferedBitmap *m_bitmap;
     wxImage m_CurrentImage;
+    wxImage m_ImageBaseSave;
     void UpdateImage(const wxImage &image);
     void HistogramSetting();
     
